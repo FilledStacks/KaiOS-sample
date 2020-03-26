@@ -1,10 +1,33 @@
-var MODULE = (function (app) {	
-
+(function (app) {
 	//input mapping
+	document.addEventListener('keydown', handleKeydown);
 	document.addEventListener('keyup', handleKeyup);
-	
-	function handleKeyup (e) {
-		switch(e.key) {
+
+	var keyOverlay = document.getElementById('keyOverlay');
+	var overlayTimeout;
+
+	function handleKeydown(e) {
+		// enable key overlay
+		keyOverlay.style.display = 'block';
+		keyOverlay.innerHTML += '<span>' + e.key + '</span>';
+		console.log('Button pressed:', e.key);
+
+		// clear overlay
+		clearTimeout(overlayTimeout);
+		overlayTimeout = setTimeout(function () {
+			keyOverlay.innerHTML = ' ';
+			keyOverlay.style.display = 'none';
+		}, 1000);
+
+		switch (e.key) {
+			case 'Backspace':
+				e.preventDefault(); // prevent the app from closing
+				break;
+		}
+	}
+
+	function handleKeyup(e) {
+		switch (e.key) {
 			case 'ArrowUp':
 			case '2': /* num pad navigation */
 				app.keyCallback.dUp();
@@ -13,7 +36,7 @@ var MODULE = (function (app) {
 			case '8': /* num pad navigation */
 				app.keyCallback.dDown();
 				break;
-			case 'ArrowLeft': 
+			case 'ArrowLeft':
 			case '4': /* num pad navigation */
 				app.keyCallback.dLeft();
 				break;
@@ -46,7 +69,7 @@ var MODULE = (function (app) {
 				app.keyCallback.other(e.key);
 		}
 	}
-	
+
 	// display ad when app is loaded
 
 	// the escape key will dismiss the ad on the PC 
@@ -72,24 +95,24 @@ var MODULE = (function (app) {
 			getKaiAd({
 				publisher: 'MyPublisherID',
 				app: 'MyApp',
-				test: testMode, 
+				test: testMode,
 				/* only for responsive ads */
-					h: adMaxHeight,
-					w: adMaxWidth,
-					container: adContainer,
+				h: adMaxHeight,
+				w: adMaxWidth,
+				container: adContainer,
 				/* up to here */
-				
+
 				/* error codes */
 				/* https://www.kaiads.com/publishers/sdk.html#error */
 				onerror: err => console.error('KaiAds error catch:', err),
 				onready: ad => {
 					ad.call('display', {
-						tabindex:  adTabIndex,
+						tabindex: adTabIndex,
 						navClass: 'navItem',
 						display: 'block'
 					})
 
-					ad.on('click', () => console.log('ad clicked') )
+					ad.on('click', () => console.log('ad clicked'))
 					ad.on('close', closeAd)
 					ad.on('display', displayAd)
 
@@ -104,7 +127,7 @@ var MODULE = (function (app) {
 		}
 	});
 
-	function displayAd () {
+	function displayAd() {
 		console.log('ad displayed');
 		if (fullscreenAd) {
 			app.fullAdVisible = true;
@@ -112,10 +135,10 @@ var MODULE = (function (app) {
 		/* do something, like pause the app */
 	}
 
-	function closeAd () {
+	function closeAd() {
 		console.log('ad closed')
 		if (fullscreenAd) {
-			setTimeout(function(){
+			setTimeout(function () {
 				app.fullAdVisible = false;
 				app.activeNavItem.focus();
 			}, 200); /* delayed to avoid background button execution */
